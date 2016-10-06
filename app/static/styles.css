@@ -179,4 +179,10 @@ button.btn.btn-primary.btn-lg {
 
 .user-avator{
     padding: 0 0 0 0;
+    width: 200px;
+    height: 200px;
+}
+
+.user-post {
+    margin-top: 30px;
 }
