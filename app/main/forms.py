@@ -56,7 +56,7 @@ class postForm(Form):
     submit = SubmitField('提交')
     def __init__(self,*args,**kwargs):
         super(postForm,self).__init__(*args,**kwargs)
-        self.role.choices = [(1,'公开'),(2,'朋友'),(3,'自己')]
+        self.variety.choices = [(1,'公开'),(2,'朋友'),(3,'自己')]
     
 class CommentForm(Form):
     comment = TextAreaField('评论',validators=[Length(1,64)])
