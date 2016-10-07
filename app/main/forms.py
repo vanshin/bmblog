@@ -52,7 +52,11 @@ class PhotoForm(Form):
 class postForm(Form):
     head = StringField('标题',validators=[Required(),Length(1,64)])
     post = PageDownField('文章',validators=[Required()])
+    variety = SelectField('类型'，validators=[Required()],coerce=int)
     submit = SubmitField('提交')
+    def __init__(self,*args,**kwargs):
+        super(postForm,self).__init__(*args,**kwargs)
+        self.role.choices = [(1,'公开'),(2,'朋友'),(3,'自己')]
     
 class CommentForm(Form):
     comment = TextAreaField('评论',validators=[Length(1,64)])
