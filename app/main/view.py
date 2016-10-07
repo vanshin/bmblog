@@ -165,7 +165,7 @@ def editPost(id):
         return redirect(url_for('.post',id=id))
     form.post.data = post.body
     form.head.data = post.head
-    form.variety.data = post.variery
+    form.variety.data = post.variety
     return render_template('edit_post.html',form=form)
 
 @main.route('/follow/<username>')
