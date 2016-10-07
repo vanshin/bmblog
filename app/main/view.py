@@ -123,7 +123,7 @@ def makePost():
         post = Post(author=current_user._get_current_object(),
                 body=form.post.data,
                 head=form.head.data,
-                variety=form.variery.data)
+                variety=form.variety.data)
         db.session.add(post)
         return redirect(url_for('.index'))
     posts = Post.query.order_by(Post.timestamp.desc()).all()
