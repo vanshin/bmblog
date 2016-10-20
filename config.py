@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+import os
 class config:
     SECRET_KEY = 'interesting'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
@@ -9,7 +10,7 @@ class config:
     MAIL_SERVER = 'smtp.163.com'
     MAIL_PORT = 25
     MAIL_USERNAME = 'kfx721@163.com'
-    MAIL_PASSWORD = 'mail520624'
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMIN = '415203893@qq.com'
     PATH = '/static/pic'
     FLASKY_PER_PAGE = 15
