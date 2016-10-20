@@ -23,11 +23,14 @@ def index():
     show_followed = False
     if current_user.is_authenticated:
         show_followed = bool(request.cookies.get('show_followed',''))
+        
     if show_followed:
         query = current_user.followed_posts
+        pagination = query.filter(Post.variety == 2).order_by(Post.timestamp.desc()).paginate(page,per_page=current_app.config['FLASKY_PER_PAGE'],
+            error_out=False)
     else:
         query = Post.query
-    pagination = query.order_by(Post.timestamp.desc()).paginate(page,per_page=current_app.config['FLASKY_PER_PAGE'],
+        pagination = query.filter(Post.variety == 1).order_by(Post.timestamp.desc()).paginate(page,per_page=current_app.config['FLASKY_PER_PAGE'],
             error_out=False)
     posts = pagination.items
     return render_template('index.html',posts=posts,
@@ -38,7 +41,13 @@ def user(name):
     user = User.query.filter_by(name=name).first()
     if user is None:
         abort(404)
-    posts = user.post.order_by(Post.timestamp.desc()).all()
+    if current_user.id == user.id:
+        posts = user.post.order_by(Post.timestamp.desc()).all()
+    elif user.is_following(current_user):
+        posts = user.post.filter(Post.variety < 3).order_by(Post.timestamp.desc()).all()
+    else:
+        posts = user.post.filter(Post.variety == 1).order_by(Post.timestamp.desc()).all()
+    
     return render_template('user.html',user=user,posts=posts)
 
 @main.route('/editAvator',methods=['POST','GET'])
@@ -112,7 +121,9 @@ def makePost():
     form = postForm()
     if form.validate_on_submit() and current_user.can(Permission.WRITE_ARTICLES):
         post = Post(author=current_user._get_current_object(),
-                body=form.post.data,head=form.head.data)
+                body=form.post.data,
+                head=form.head.data,
+                variety=form.variety.data)
         db.session.add(post)
         return redirect(url_for('.index'))
     posts = Post.query.order_by(Post.timestamp.desc()).all()
@@ -148,11 +159,13 @@ def editPost(id):
     if form.validate_on_submit():
         post.body = form.post.data
         post.head = form.head.data
+        post.variety = form.variety.data
         db.session.add(post)
         flash('文章更改成功')
         return redirect(url_for('.post',id=id))
     form.post.data = post.body
     form.head.data = post.head
+    form.variety.data = post.variety
     return render_template('edit_post.html',form=form)
 
 @main.route('/follow/<username>')
