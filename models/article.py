@@ -7,11 +7,11 @@ class Article(Base):
 
     __tablename__ = "article"
     __table_args__ = (
-        {'comment': 'pdf转换以后的markdown'},
+        {'comment': '文章'},
     )
 
-    title: Mapped[int] = mapped_column(String(200), comment='')
-    group_id: Mapped[int] = mapped_column(Integer, comment='group ID')
+    title: Mapped[str] = mapped_column(String(200), comment='标题')
+    group_id: Mapped[int] = mapped_column(Integer, comment='分组ID')
     content: Mapped[str] = mapped_column(Text, comment='markdown内容')
 
 
@@ -21,4 +21,4 @@ class Group(Base):
         {'comment': '文章分组'},
     )
 
-    content: Mapped[str] = mapped_column(Text)
+    name: Mapped[str] = mapped_column(String(200), comment='分组名称')
