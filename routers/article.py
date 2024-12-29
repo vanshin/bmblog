@@ -226,3 +226,11 @@ async def add_group(
                 "message": "服务器错误"
             }
         )
+
+@router.get('/')
+def root(
+    request: Request,
+    templates: Jinja2Templates = Depends(get_templates),
+    db = Depends(get_session)
+):
+    return blog(request, templates, db)
