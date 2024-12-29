@@ -166,3 +166,4 @@ log
 mtools
 .idea/*
 config.py
+**/config.py

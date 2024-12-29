@@ -1,13 +1,13 @@
-from config import config
 from openai import AsyncOpenAI
+from dependencies import get_settings
 
 async def generate_article_summary(content: str) -> str:
     """
     生成文章摘要
     """ 
     client = AsyncOpenAI(
-        api_key=config["OPENAI_API_KEY"],
-        base_url=config["OPENAI_BASE_URL"]
+        api_key=get_settings().OPENAI_API_KEY,
+        base_url=get_settings().OPENAI_BASE_URL
     )
 
     response = await client.chat.completions.create(
