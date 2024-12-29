@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     db_port: str = "3306"
     db_name: str = "blog"
     SECRET_KEY: str = "123456"
+    OPENAI_API_KEY: str = "sk-TUT8ye"
+    OPENAI_BASE_URL: str = "https://xiaoai.plus/v1"
 
     @property
     def db_url(self) -> str:
