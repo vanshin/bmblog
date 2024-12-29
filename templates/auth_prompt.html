@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>认证</title>
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h2>请输入密码</h2>
+        <form id="auth-form">
+            <div class="form-group">
+                <input type="password" id="key" name="key" placeholder="请输入密码" required>
+            </div>
+            <button type="submit">确认</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('auth-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const key = document.getElementById('key').value;
+            
+            try {
+                const response = await fetch('/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ key })
+                });
+
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    const returnUrl = new URL('{{ return_url }}');
+                    returnUrl.searchParams.set('key', key);
+                    window.location.href = returnUrl.toString();
+                } else {
+                    alert(data.message || '密码验证失败');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('验证过程中出现错误，请重试');
+            }
+        });
+    </script>
+</body>
+</html> 

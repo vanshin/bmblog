@@ -8,13 +8,13 @@ from models import Base
 from sqlalchemy.orm import sessionmaker
 
 from config import Settings
-from dependencies import get_db_settings
+from dependencies import get_settings
 from fastapi import Depends
 from models.article import Group
 
 # 创建全局 engine 实例
 engine = create_engine(
-    get_db_settings().db_url, 
+    get_settings().db_url, 
     echo=True, 
     pool_size=10, 
     max_overflow=20
@@ -31,12 +31,10 @@ def create_tables():
     Base.metadata.create_all(bind=engine)
 
 def init_db():
-    Base.metadata.create_all(bind=engine)
-    
     # Create default session
     Session = sessionmaker(bind=engine)
     session = Session()
-    
+    create_tables()
     # Check if default group exists
     default_group = session.query(Group).filter(Group.name == "无分组").first()
     if not default_group:
@@ -47,6 +45,10 @@ def init_db():
     
     session.close()
 
-create_tables()
-
-
+def migrate_db():
+    """Run database migrations using alembic"""
+    from alembic.config import Config
+    from alembic import command
+    
+    alembic_cfg = Config("alembic.ini")
+    command.upgrade(alembic_cfg, "head")

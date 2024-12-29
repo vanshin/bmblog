@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     db_host: str = "localhost"
     db_port: str = "3306"
     db_name: str = "blog"
+    SECRET_KEY: str = "123456"
 
     @property
     def db_url(self) -> str:

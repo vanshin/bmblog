@@ -6,7 +6,7 @@
     <title>添加文章</title>
     <style>
         .container {
-            max-width: 800px;
+            max-width: 95%;
             margin: 0 auto;
             padding: 20px;
         }
@@ -50,7 +50,13 @@
             margin-top: 5px;
             font-size: 14px;
         }
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1400px;
+            }
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -63,17 +69,49 @@
             
             <div class="form-group">
                 <label for="group">分组：</label>
-                <select id="group" name="group_id" required>
-                    <option value="">请选择分组</option>
-                    {% for group in groups %}
-                    <option value="{{ group.id }}">{{ group.name }}</option>
-                    {% endfor %}
-                </select>
+                <div style="display: flex; gap: 10px;">
+                    <select id="group" name="group_id" required style="flex: 1;">
+                        <option value="">请选择分组</option>
+                        {% for group in groups %}
+                        <option value="{{ group.id }}">{{ group.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" id="newGroup" placeholder="新分组名称" style="flex: 1;">
+                    <button type="button" id="addGroupBtn" style="width: auto;">添加新分组</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="key">密钥：</label>
+                <input type="password" id="key" name="key" required>
             </div>
             
             <div class="form-group">
                 <label for="content">内容：</label>
-                <textarea id="content" name="content" required></textarea>
+                <div style="display: flex; gap: 20px;">
+                    <div id="preview" style="flex: 1; border: 1px solid #ccc; border-radius: 4px; padding: 10px; min-height: 200px; overflow-y: auto;"></div>
+                    <textarea id="content" name="content" required style="flex: 1;"></textarea>
+                </div>
+                <script>
+                    const contentTextarea = document.getElementById('content');
+                    const previewDiv = document.getElementById('preview');
+                    
+                    marked.setOptions({
+                        breaks: true,  // 支持 GitHub 风格的换行
+                        gfm: true,    // 启用 GitHub 风格的 Markdown
+                        sanitize: false // 允许 HTML 标签
+                    });
+                    
+                    contentTextarea.addEventListener('input', () => {
+                        const markdownText = contentTextarea.value;
+                        try {
+                            const html = marked.parse(markdownText);
+                            previewDiv.innerHTML = html;
+                        } catch (error) {
+                            console.error('Error rendering markdown:', error);
+                            previewDiv.innerHTML = '<em>Error rendering markdown preview</em>';
+                        }
+                    });
+                </script>
             </div>
             
             <button type="submit">提交</button>
@@ -81,6 +119,45 @@
     </div>
 
     <script>
+        document.getElementById('addGroupBtn').addEventListener('click', async () => {
+            const newGroupInput = document.getElementById('newGroup');
+            const groupName = newGroupInput.value.trim();
+            const groupSelect = document.getElementById('group');
+            
+            if (!groupName) {
+                alert('请输入分组名称！');
+                return;
+            }
+
+            try {
+                const response = await fetch('/add_group', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: groupName })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    const option = new Option(groupName, result.id);
+                    groupSelect.add(option);
+                    
+                    groupSelect.value = result.id;
+                    
+                    newGroupInput.value = '';
+                    
+                    alert('分组添加成功！');
+                } else {
+                    alert(`添加失败：${result.message || '请重试！'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('发生错误，请重试！');
+            }
+        });
+
         document.getElementById('articleForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -88,10 +165,13 @@
             const data = {
                 title: formData.get('title'),
                 group_id: parseInt(formData.get('group_id')),
-                content: formData.get('content')
+                content: formData.get('content'),
+                key: formData.get('key')
             };
 
             try {
+                console.log('Sending data:', data);
+                
                 const response = await fetch('/add', {
                     method: 'POST',
                     headers: {
@@ -100,11 +180,21 @@
                     body: JSON.stringify(data)
                 });
 
+                console.log('Response status:', response.status);
+                console.log('Response headers:', Object.fromEntries(response.headers));
+                
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+                
+                const result = responseText ? JSON.parse(responseText) : null;
+                console.log('Parsed result:', result);
+
                 if (response.ok) {
                     alert('文章添加成功！');
                     window.location.href = '/blog';
                 } else {
-                    alert('添加失败，请重试！');
+                    const errorMessage = result.message || '请重试！';
+                    alert(`添加失败：${errorMessage}`);
                 }
             } catch (error) {
                 console.error('Error:', error);
